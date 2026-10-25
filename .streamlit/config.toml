@@ -1,0 +1,8 @@
+# Streamlit settings for PrintProof AI.
+# headless = true: start without Streamlit's first-run "Email:" question (which blocks a fresh
+# install) and without auto-opening a browser tab. Open http://localhost:8501 yourself.
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
