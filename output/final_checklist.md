@@ -6,9 +6,9 @@ Checked on 2026-10-25. Every ✅ below was actually run; anything not done is ma
 
 | # | Item | Status |
 |---|---|---|
-| 1 | GitHub repository URL | ⏳ **Not created yet** — creating a public repository needs the author's action (see §6) |
-| 2 | `report.html` (upload the file from the project folder) | ✅ Ready — standalone, 14 printed pages; GitHub link placeholder still to be replaced |
-| 3 | `slides.html` (upload the file from the project folder) | ✅ Ready — standalone, 10 slides; GitHub link placeholder still to be replaced |
+| 1 | GitHub repository URL | ✅ **https://github.com/BeckJamilov/printproof-ai** (public) |
+| 2 | `report.html` (upload the file from the project folder) | ✅ Ready — standalone, 14 printed pages, GitHub link included; identical to the copy on GitHub |
+| 3 | `slides.html` (upload the file from the project folder) | ✅ Ready — standalone, 10 slides, GitHub link included; identical to the copy on GitHub |
 
 Optional demo video: not needed (per instructions).
 
@@ -19,10 +19,10 @@ Optional demo video: not needed (per instructions).
 | Unnecessary files removed | ✅ No caches, temporary scripts or browser configs in the project (helper scripts used for screenshots and printing were kept outside the project) |
 | `.gitignore` | ✅ Excludes `.env`, `.env.*` (except `.env.example`), `.venv/`, `__pycache__/`, `.pytest_cache/`, `.streamlit/secrets.toml`, `.claude/`, editor folders, logs and temp files |
 | Secret scan of the working folder | ✅ 61 files compared byte-by-byte with the real `PORTKEY_API_KEY` (never printed): no match; no key-like patterns |
-| Secret scan of the Git history | ✅ All 76 file versions in all 4 commits checked: no key, no `.env` tracked |
+| Secret scan of the Git history | ✅ All 76 file versions in the first 4 commits checked before the first push: no key, no `.env` tracked. Later commits changed only the checklist, prompts, audit trail, report and slides (no keys; audit trail masks keys) |
 | `requirements.txt` | ✅ Only what is needed, pinned to tested versions: streamlit 1.66.1, pymupdf 2.0, python-dotenv 1.2.4, pydantic-ai-slim[openai] 2.56.0, openai 3.31.0, httpx2 2.16.0, pytest 9.1.1 |
 | Sample data included | ✅ `sample_pdfs/` (2 PDFs) and `tests/eval_pdfs/` (13 PDFs) are tracked; no feature depends on files outside the project except the optional `.env` |
-| Files tracked | 62 (source, tests, PDFs, evidence, screenshots, report, slides, config) |
+| Files tracked | 63 (source, tests, PDFs, evidence, screenshots, report, slides, config, this checklist) |
 
 ## 3. Fresh installation test (local clean clone)
 
@@ -69,21 +69,42 @@ Done in a new empty folder `%TEMP%\pp_fresh\printproof-ai` (cloned from the loca
 | Slide navigation | ✅ Arrow keys move between slides |
 | Fullscreen | ✅ F key and ⛶ button both enter fullscreen |
 | Text cut off | ✅ No slide content extends past the 720 px slide height |
-| GitHub link in report/slides/README | ⏳ Report and slides still show the placeholder; README already shows the expected URL `https://github.com/BeckJamilov/printproof-ai`, which will only work after the repository is created |
+| GitHub link in report/slides/README | ✅ Placeholders replaced: report.html (2 links), slides.html (2 links), README. Report still prints to 14 pages; slides still 10 and nothing cut off |
+| Links work | ✅ 9 links answer HTTP 200, including https://github.com/BeckJamilov/printproof-ai. ⚠️ 5 Adobe/OpenAI help pages (`helpx.adobe.com` ×4, `help.openai.com` ×1) block automated checks (HTTP 403 / “Access Denied” / bot check even in headless Chrome), so they could **not** be verified automatically — open them once in a normal browser |
+| App link | ℹ️ None — stated as “runs locally”; no public app link is claimed |
 
 ## 6. GitHub
 
 | Check | Result |
 |---|---|
 | Git installed | ✅ git 2.55.0 |
-| GitHub CLI and login | ✅ gh 2.102.0, logged in as **BeckJamilov** (scopes include `repo`) |
-| Repository `printproof-ai` exists | ❌ Not yet. `BeckJamilov/printproof-ai` does not exist. Creating a **public** repository was blocked by the assistant's permission settings, so it needs the author's decision/action |
-| Pushed | ❌ Not pushed. 4 commits are ready locally on branch `main` |
-| Remote contents verified / fresh clone from GitHub | ❌ Not possible until the repository exists |
+| GitHub CLI and login | ✅ gh 2.102.0, logged in as **BeckJamilov** |
+| Repository created | ✅ https://github.com/BeckJamilov/printproof-ai — **public**, default branch `main`. Created and first pushed by the author with `gh repo create printproof-ai --public --source . --remote origin --push` (the assistant's permission settings did not allow it to publish a public repository) |
+| Uploaded contents verified | ✅ GitHub `main` = local `main` (same commit); file list on GitHub identical to the local tracked files (63 files); no `.env`, `.venv` or caches on GitHub; repository page answers HTTP 200 |
+| Link update pushed | ✅ commit `ebeda67` (“Add GitHub repository link…”) pushed by the assistant to the existing repository |
+
+### Fresh-clone test from GitHub
+
+`git clone https://github.com/BeckJamilov/printproof-ai.git` into a new empty folder `%TEMP%\pp_gh`, `.env`
+one folder above the clone, README commands followed exactly in Windows PowerShell:
+
+| Step | Result |
+|---|---|
+| Clone | ✅ commit `ebeda67`, 63 files, no `.env` inside the clone |
+| `py -m venv .venv` + `pip install -r requirements.txt` | ✅ exit code 0; clone + install 161 s |
+| `python -m pytest` | ✅ **61 passed, 4 skipped** |
+| `python -m streamlit run app.py` | ✅ no prompt; ready about 1 s after start |
+| `.env` one folder above | ✅ “.env loaded from: pp_gh · Portkey key detected” |
+| Good / problem sample, manual mode | ✅ 4 passed / 4 failed, as expected; report download present |
+| AI mode through Portkey | ✅ run `b8b8cf05907f`: 2 API calls, 4 tool calls, “AI report matches the measured results”; Portkey cache **HIT** (0 new model tokens); recorded in `output/audit_trail.json` |
+| report.html / slides.html in the clone | ✅ byte-identical (SHA-256) to the files to be uploaded to Canvas |
+| Total time clone → working AI check | ≈ 3 minutes |
+
+Both temporary test folders (and the copies of `.env` used for testing) were deleted afterwards.
 
 ## 7. Still missing / pending
 
-- ⏳ GitHub repository creation and push (author action) → then replace the link placeholders and verify.
+- ⚠️ Open the 5 Adobe/OpenAI source links in report.html once by hand (they block automated checks).
 - ⏳ Student test (procedure and form ready in `output/user_testing.md` and `output/user_test_results.csv`).
 - ⏳ Independent real-world PDF testing (no independent PDFs available in the project).
 - ℹ️ No public app link — the app runs locally; none is claimed.

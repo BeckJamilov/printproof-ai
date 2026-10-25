@@ -61,4 +61,8 @@ _None yet._
 
 ### Follow-up prompts
 
-_None yet._
+### Follow-up prompt 1
+
+**What was missing:** The public GitHub repository could not be created by the assistant because its permission settings block publishing a public repository, so the author ran `gh repo create printproof-ai --public --source . --remote origin --push` and then asked to finish the GitHub-dependent steps (links, verification of the uploaded repository and the fresh-clone test from GitHub).
+
+> I ran the gh repo create command myself and the repository is pushed. Please continue: update the GitHub links in report.html, slides.html and README.md, verify the uploaded repository, and do the fresh-clone test from GitHub.
