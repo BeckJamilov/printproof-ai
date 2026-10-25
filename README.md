@@ -65,8 +65,10 @@ To create option B from the template: `Copy-Item .env.example .env` and then edi
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-Your browser opens http://localhost:8501 (open it yourself if it doesn't). The first start can take
-a few seconds. Stop the app with **Ctrl+C** in PowerShell.
+When PowerShell shows `You can now view your Streamlit app in your browser`, open
+**http://localhost:8501** in your browser. (The project's `.streamlit/config.toml` starts Streamlit
+without its first-run email question and without opening a tab automatically.) Stop the app with
+**Ctrl+C** in PowerShell.
 
 ## How to use it
 
@@ -124,6 +126,7 @@ Re-run the evaluation on the 13 test PDFs (free):
 | `streamlit : The term 'streamlit' is not recognized` | Use the full command from step 4 (`.\.venv\Scripts\python.exe -m streamlit run app.py`) |
 | Sidebar says "Portkey key not found" | Check that `.env` is in the project folder or the folder directly above it, and that the line starts with `PORTKEY_API_KEY=` |
 | Port 8501 is already in use | `.\.venv\Scripts\python.exe -m streamlit run app.py --server.port 8502` |
+| `git clone` or `pip install` fails with "Filename too long" | Clone into a short path such as `C:\Users\<you>\printproof-ai`; Windows limits paths to 260 characters |
 
 ## How it works
 
@@ -175,6 +178,7 @@ printproof-ai/
 ├── output/                 evidence, audit trail, screenshots, checklists
 ├── report.html             final report (standalone)
 ├── slides.html             final presentation (standalone, reveal.js 5.2.1 bundled, MIT license)
+├── .streamlit/config.toml  starts Streamlit without the first-run prompt
 ├── requirements.txt, .env.example, .gitignore
 ├── AI_prompts.md
 └── README.md
