@@ -110,8 +110,8 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
   <table class="links">
     <tr><td>Project</td><td>PrintProof AI</td></tr>
     <tr><td>Author</td><td>Beck Jamilov</td></tr>
-    <tr><td>GitHub repository</td><td><span class="placeholder">[PLACEHOLDER — GitHub link will be added in Step 6]</span></td></tr>
-    <tr><td>App link</td><td><span class="placeholder">[PLACEHOLDER — no public deployment yet]</span> The app runs locally: <code>.\.venv\Scripts\python.exe -m streamlit run app.py</code></td></tr>
+    <tr><td>GitHub repository</td><td><a href="https://github.com/BeckJamilov/printproof-ai">https://github.com/BeckJamilov/printproof-ai</a></td></tr>
+    <tr><td>App link</td><td>None — there is no public deployment. The app runs locally after following the README: <code>.\.venv\Scripts\python.exe -m streamlit run app.py</code></td></tr>
   </table>
   <div class="oneliner"><b>In one sentence:</b> PrintProof lets a user upload a PDF, state the requirements (for example “maximum 5 pages, US Letter, at least 10 pt font, 1 inch margins”), and get a page-by-page Pass / Fail / Needs Review result measured by Python code, with an AI agent that understands requirements written in plain English.</div>
 
@@ -218,7 +218,7 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
 <!-- ============ 5. TOKENOMICS ============ -->
 <section id="tokenomics">
   <h2><span class="num">5</span>Tokenomics</h2>
-  <p><span class="label t-meas">Measured</span> The audit trail contains every AI run made during the project: <b>10 fresh runs</b> (the model really worked), <b>5 Portkey cache hits</b> (Portkey returned a saved answer for an identical request) and <b>2 runs rejected</b> before the model ran (the reasoning setting above and one Azure safety-filter block; 0 tokens).</p>
+  <p><span class="label t-meas">Measured</span> The audit trail contains every AI run made during the project: <b>10 fresh runs</b> (the model really worked), <b>6 Portkey cache hits</b> (Portkey returned a saved answer for an identical request) and <b>2 runs rejected</b> before the model ran (the reasoning setting above and one Azure safety-filter block; 0 tokens).</p>
   <table>
     <colgroup><col style="width:36%"><col><col><col><col></colgroup>
     <tr><th>Per fresh run (10 runs)</th><th class="num">Average</th><th class="num">Min</th><th class="num">Max</th><th class="num">Total</th></tr>
@@ -363,7 +363,7 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
     <tr><td>4</td><td>Deployment: host the app with a privacy notice, per-user limits and automatic deletion of uploads; compare cost and quality of reasoning models through the Responses API</td><td>Working public link; measured cost per user from real usage</td></tr>
   </table>
   <p>The most important lesson from this project is that the AI is useful as an <b>interface</b> — understanding what people mean — while the <b>facts</b> should come from simple, testable code. Keeping these two jobs separate made PrintProof cheaper, easier to test and harder to trick.</p>
-  <footer>PrintProof AI · MGT 409 final project report · Beck Jamilov · October 2026. Evidence files: <code>output/evaluation.md</code>, <code>output/evaluation_results.json</code>, <code>output/competitor_analysis.md</code>, <code>output/tokenomics.md</code>, <code>output/safety_review.md</code>, <code>output/project_evidence.md</code>, <code>output/audit_trail.json</code>, <code>output/screenshots/</code>.</footer>
+  <footer>PrintProof AI · MGT 409 final project report · Beck Jamilov · October 2026. Repository: <a href="https://github.com/BeckJamilov/printproof-ai">https://github.com/BeckJamilov/printproof-ai</a>. Evidence files: <code>output/evaluation.md</code>, <code>output/evaluation_results.json</code>, <code>output/competitor_analysis.md</code>, <code>output/tokenomics.md</code>, <code>output/safety_review.md</code>, <code>output/project_evidence.md</code>, <code>output/audit_trail.json</code>, <code>output/screenshots/</code>.</footer>
 </section>
 
 </main>
