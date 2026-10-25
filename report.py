@@ -26,8 +26,10 @@ from pdf_checker import (
     PAPER_SIZES,
     CheckResult,
     PageInfo,
+    MAX_SUMMARY_GROUPS,
     format_pages,
     format_size,
+    pages_label,
     render_page_preview,
 )
 
@@ -71,6 +73,7 @@ def suggestions_for(result: CheckResult, pages: list[PageInfo]) -> list[str]:
     if result.status == PASS:
         return []
     by_number = {p.number: p for p in pages}
+    total = result.total_pages or len(pages)
     tips: list[str] = []
 
     if result.name == "Page count":
@@ -87,15 +90,13 @@ def suggestions_for(result: CheckResult, pages: list[PageInfo]) -> list[str]:
     elif result.name == "Paper size":
         target = str(result.limit)
         if result.status == FAIL:
-            for number in result.problem_pages:
-                p = by_number.get(number)
-                if p:
-                    tips.append(f"Page {number} is {p.size_name}, {format_size(p.width_pt, p.height_pt)}; "
-                                f"it must be {target}.")
+            # "What was found" already lists the wrong sizes per group, so the fix is one action line.
+            affected = result.problem_pages
+            where = f"all {total} pages" if len(affected) == total and total > 1 else format_pages(affected)
             w, h = PAPER_SIZES.get(target, (0, 0))
-            tips.append(f"In the source document set the page size to {target} "
-                        f"— {format_size(w, h)} — for every section, then export to PDF again. "
-                        "In Word: Layout → Size. In Google Docs: File → Page setup.")
+            tips.append(f"Change {where} to {target} ({format_size(w, h)}): in the source document set the page "
+                        "size for every section, then export to PDF again. In Word: Layout → Size. "
+                        "In Google Docs: File → Page setup.")
             tips.append("After re-exporting, check that the layout did not shift and run PrintProof again.")
         else:
             tips.append(f"{format_pages(result.review_pages).capitalize()} have the right paper size but "
@@ -104,11 +105,15 @@ def suggestions_for(result: CheckResult, pages: list[PageInfo]) -> list[str]:
 
     elif result.name == "Minimum font size":
         if result.status == FAIL:
-            for number in result.problem_pages:
-                p = by_number.get(number)
-                if p and p.smallest_font_pt is not None:
-                    tips.append(f"Page {number}: the smallest text is {p.smallest_font_pt:.1f} pt. "
-                                f"Increase it to at least {result.limit:g} pt.")
+            affected = result.problem_pages
+            worst = min(((by_number[n].smallest_font_pt, n) for n in affected
+                         if n in by_number and by_number[n].smallest_font_pt is not None), default=None)
+            where = f"all {total} pages" if len(affected) == total and total > 1 else format_pages(affected)
+            line = (f"Increase all text to at least {result.limit:g} pt. Text below the minimum is on {where} "
+                    f"({len(affected)} of {total})")
+            if worst:
+                line += f"; the smallest is {worst[0]:.1f} pt on page {worst[1]}"
+            tips.append(line + ".")
             tips.append("Look at footnotes, tables, captions, headers/footers and text inside charts — "
                         "these are where the small text was measured (highlighted in the previews below).")
         if result.review_pages:
@@ -119,15 +124,19 @@ def suggestions_for(result: CheckResult, pages: list[PageInfo]) -> list[str]:
     elif result.name == "Minimum margins":
         if result.status == FAIL:
             limit = float(result.limit)
-            for number in result.problem_pages:
-                p = by_number.get(number)
-                if not p or not p.margins_in:
-                    continue
-                short = [f"{side} edge by {limit - v:.2f} in / {(limit - v) * MM_PER_INCH:.0f} mm "
-                         f"(now {v:.2f} in)"
-                         for side, v in p.margins_in.items() if v < limit - 0.007]
+            groups = result.groups or [
+                {"pages": [n], "sides": {side: v for side, v in by_number[n].margins_in.items() if v < limit - 0.007}}
+                for n in result.problem_pages if n in by_number and by_number[n].margins_in]
+            for g in groups[:MAX_SUMMARY_GROUPS]:
+                short = [f"{side} edge by {limit - v:.2f} in / {(limit - v) * MM_PER_INCH:.0f} mm (now {v:.2f} in)"
+                         for side, v in g["sides"].items()]
                 if short:
-                    tips.append(f"Page {number}: move content further from the " + "; ".join(short) + ".")
+                    tips.append(f"{pages_label(g['pages'], total)}: move content further from the "
+                                + "; ".join(short) + ".")
+            if len(groups) > MAX_SUMMARY_GROUPS:
+                rest = sorted(n for g in groups[MAX_SUMMARY_GROUPS:] for n in g["pages"])
+                tips.append(f"{len(rest)} more page(s) ({format_pages(rest)}) need different amounts — "
+                            "see the page-by-page details.")
             tips.append(f"Set the document margins to at least {limit:.3g} in ({limit * MM_PER_INCH:.1f} mm) "
                         "and check items placed outside the text area, such as headers, footers, page "
                         "numbers, images and logos.")
@@ -170,6 +179,10 @@ tr:last-child td { border-bottom:none; }
 .issue h3 { margin:0 0 6px; font-size:16px; display:flex; justify-content:space-between; gap:10px; }
 .issue .facts { color:var(--muted); font-size:13px; margin-bottom:8px; }
 .issue ul { margin:6px 0 0 18px; padding:0; } .issue li { margin:4px 0; }
+.issue details.per-page { margin:4px 0 8px; font-size:13px; }
+.issue details.per-page summary { cursor:pointer; color:var(--muted); font-weight:600; }
+.issue details.per-page ul { max-height:none; color:#3a3440; }
+@media print { .issue details.per-page:not([open]) { display:none; } }
 .issue .ai { margin-top:10px; background:var(--pink-soft); border-radius:10px; padding:8px 12px; font-size:13px; }
 .issue .ai b { color:var(--pink); }
 .none { background:#fff; border:1px dashed var(--line); border-radius:14px; padding:14px 18px; color:var(--muted); }
@@ -257,14 +270,19 @@ def build_html_report(*, file_name: str, pdf_bytes: bytes, mode: str, results: l
         if r.status == PASS:
             continue
         tips = "".join(f"<li>{esc(t)}</li>" for t in suggestions_for(r, pages))
-        details = "".join(f"<li>{esc(d)}</li>" for d in r.details)
+        details = "".join(f"<li>{esc(d)}</li>" for d in (r.summary or r.details))
+        per_page = ""
+        if len(r.details) > 1:
+            rows = "".join(f"<li>{esc(d)}</li>" for d in r.details)
+            per_page = (f"<details class='per-page'><summary>Page-by-page details ({len(r.details)} lines)</summary>"
+                        f"<ul>{rows}</ul></details>")
         ai_note = (f"<div class='ai'><b>AI explanation:</b> {esc(explanations[r.name])}</div>"
                    if r.name in explanations else "")
         issues.append(
             f"<div class='issue {'review' if r.status == NEEDS_REVIEW else ''}'>"
             f"<h3>{esc(r.name)} <span class='badge {BADGE[r.status]}'>{esc(r.status)}</span></h3>"
             f"<div class='facts'>Required: {esc(r.requirement)} · Measured: {esc(r.actual)}</div>"
-            f"{'<b>What was found</b><ul>' + details + '</ul>' if details else ''}"
+            f"{'<b>What was found</b><ul>' + details + '</ul>' if details else ''}{per_page}"
             f"<b>How to fix it</b><ul>{tips}</ul>{ai_note}</div>"
         )
     issues_html = "".join(issues) or "<div class='none'>No problems were found in the checks that were run.</div>"

@@ -78,6 +78,12 @@ class CheckResult:
     review_pages: list[int] = field(default_factory=list)
     highlights: list[Highlight] = field(default_factory=list)
     limit: float | str | None = None  # the requirement value (pages, paper name, pt or inches)
+    # Short, grouped explanation for people (the same problem on many pages is said once).
+    # `details` above keeps one line per page for the expandable page-by-page view and the AI tools.
+    summary: list[str] = field(default_factory=list)
+    # Pages with identical measurements, e.g. [{"pages": [2, 3], "sides": {"left": 0.31}}].
+    groups: list[dict] = field(default_factory=list)
+    total_pages: int = 0
 
 
 @dataclass
@@ -141,6 +147,32 @@ def format_pages(pages: list[int]) -> str:
     ranges.append(f"{start}–{prev}" if start != prev else str(start))
     label = "page" if len(pages) == 1 else "pages"
     return f"{label} {', '.join(ranges)}"
+
+
+def pages_label(pages: list[int], total: int) -> str:
+    """'All 32 pages', 'Page 4' or 'Pages 2–31 (30 of 32)'."""
+    pages = sorted(set(pages))
+    if total > 1 and len(pages) == total:
+        return f"All {total} pages"
+    if len(pages) == 1:
+        return f"Page {pages[0]}"
+    return f"{format_pages(pages).capitalize()} ({len(pages)} of {total})"
+
+
+def group_pages(items: list[tuple[int, object]]) -> list[tuple[object, list[int]]]:
+    """Group page numbers that share the same key; largest groups first, then by first page."""
+    groups: dict[object, list[int]] = {}
+    for page, key in items:
+        groups.setdefault(key, []).append(page)
+    return sorted(groups.items(), key=lambda kv: (-len(kv[1]), kv[1][0]))
+
+
+def _where(pages: list[int], total: int) -> str:
+    """'all 32 pages' or 'pages 3, 6' (lower case, for use inside a sentence)."""
+    return f"all {total} pages" if total > 1 and len(set(pages)) == total else format_pages(pages)
+
+
+MAX_SUMMARY_GROUPS = 4  # more groups than this are only listed in the page-by-page details
 
 
 def identify_paper_size(width_pt: float, height_pt: float) -> str:
@@ -303,7 +335,20 @@ def check_paper_size(scans: list[_PageScan], paper_size: str) -> CheckResult:
     sizes = sorted({s.info.size_name for s in scans})
     actual = ", ".join(sizes)
     if wrong:
-        return CheckResult("Paper size", FAIL, requirement, actual, details, problem_pages=wrong)
+        by_number = {s.info.number: s.info for s in scans}
+        grouped = group_pages([(n, (by_number[n].size_name, round(by_number[n].width_pt, 1),
+                                    round(by_number[n].height_pt, 1))) for n in wrong])
+        summary = []
+        for (name, w, h), pages in grouped[:MAX_SUMMARY_GROUPS]:
+            verb = "is" if len(pages) == 1 else "are"
+            summary.append(f"{pages_label(pages, len(scans))} {verb} {name}, {format_size(w, h)} — not {paper_size}.")
+        if len(grouped) > MAX_SUMMARY_GROUPS:
+            rest = [n for _, pages in grouped[MAX_SUMMARY_GROUPS:] for n in pages]
+            summary.append(f"{len(rest)} more page(s) with other sizes — see the page-by-page details.")
+        groups = [{"pages": pages, "size_name": name, "width_pt": w, "height_pt": h}
+                  for (name, w, h), pages in grouped]
+        return CheckResult("Paper size", FAIL, requirement, actual, details, problem_pages=wrong,
+                           summary=summary, groups=groups)
     if landscape:
         return CheckResult(
             "Paper size", NEEDS_REVIEW, requirement, actual,
@@ -327,7 +372,7 @@ def check_font_size(scans: list[_PageScan], min_font_pt: float) -> CheckResult:
 
     smallest = min(s.info.smallest_font_pt for s in text_pages)
     actual = f"Smallest text: {smallest:.1f} pt"
-    problem_pages, details, highlights = [], [], []
+    problem_pages, details, highlights, worst = [], [], [], []
     for scan in text_pages:
         small = [(size, bbox, txt) for size, bbox, txt in scan.text_spans
                  if size < min_font_pt - FONT_TOLERANCE_PT]
@@ -335,6 +380,8 @@ def check_font_size(scans: list[_PageScan], min_font_pt: float) -> CheckResult:
             continue
         number = scan.info.number
         problem_pages.append(number)
+        smallest_span = min(small, key=lambda t: t[0])
+        worst.append((round(smallest_span[0], 1), number, smallest_span[2], len(small)))
         sizes = sorted({round(size, 1) for size, _, _ in small})
         example = small[0][2]
         if len(example) > 60:
@@ -349,9 +396,34 @@ def check_font_size(scans: list[_PageScan], min_font_pt: float) -> CheckResult:
     review_pages = [s.info.number for s in scans if not s.info.has_text and s.info.looks_scanned]
 
     if problem_pages:
+        total = len(scans)
+        worst.sort(key=lambda t: (t[0], t[1]))
+        below = sorted({round(size, 1) for scan in text_pages for size, _, _ in scan.text_spans
+                        if size < min_font_pt - FONT_TOLERANCE_PT})
+        size_list = ", ".join(f"{v:g}" for v in below[:6]) + (", …" if len(below) > 6 else "")
+        runs = sum(t[3] for t in worst)
+        summary = [
+            f"Text smaller than {min_font_pt:g} pt on {_where(problem_pages, total)} "
+            f"({len(problem_pages)} of {total} page{'s' if total != 1 else ''}, "
+            f"{runs} text run{'s' if runs != 1 else ''}).",
+            f"Smallest text: {worst[0][0]:.1f} pt on page {worst[0][1]}. Sizes below the minimum: {size_list} pt.",
+        ]
+        examples, seen = [], set()
+        for size, number, text, _ in worst:  # smallest first; up to 3 different texts
+            if text in seen:
+                continue
+            seen.add(text)
+            short = text if len(text) <= 50 else text[:47] + "..."
+            examples.append(f'page {number}, {size:g} pt: "{short}"')
+            if len(examples) == 3:
+                break
+        summary.append(("Examples — " if len(examples) > 1 else "Example — ") + "; ".join(examples) + ".")
+        if review_pages:
+            summary.append(f"{format_pages(review_pages).capitalize()} have no readable text and could not be measured.")
+        groups = [{"page": n, "smallest_pt": sz, "runs": r} for sz, n, _, r in worst]
         return CheckResult("Minimum font size", FAIL, requirement, actual, details,
                            problem_pages=problem_pages, review_pages=review_pages,
-                           highlights=highlights)
+                           highlights=highlights, summary=summary, groups=groups)
     if review_pages:
         return CheckResult(
             "Minimum font size", NEEDS_REVIEW, requirement, actual,
@@ -376,7 +448,8 @@ def check_margins(scans: list[_PageScan], min_margin_in: float) -> CheckResult:
         )
 
     tightest_side, tightest = None, None
-    problem_pages, details, highlights = [], [], []
+    problem_pages, details, highlights, profiles = [], [], [], []
+    worst_side, worst_value, worst_page = None, None, None
     for scan in measured:
         p = scan.info
         for side, value in p.margins_in.items():
@@ -386,6 +459,10 @@ def check_margins(scans: list[_PageScan], min_margin_in: float) -> CheckResult:
         if not too_small:
             continue
         problem_pages.append(p.number)
+        profiles.append((p.number, tuple((side, round(v, 2)) for side, v in too_small.items())))
+        for side, v in too_small.items():
+            if worst_value is None or v < worst_value:
+                worst_side, worst_value, worst_page = side, v, p.number
         sides = ", ".join(f"{side} {v:.2f} in" for side, v in too_small.items())
         details.append(f"Page {p.number}: content too close to the edge — {sides}")
 
@@ -397,9 +474,24 @@ def check_margins(scans: list[_PageScan], min_margin_in: float) -> CheckResult:
 
     actual = f"Tightest margin: {tightest:.2f} in ({tightest_side})"
     if problem_pages:
+        total = len(scans)
+        grouped = group_pages(profiles)
+        summary = [
+            f"Content is closer than {min_margin_in:.3g} in to the edge on {_where(problem_pages, total)} "
+            f"({len(problem_pages)} of {total} page{'s' if total != 1 else ''}).",
+            f"Smallest margin: {worst_value:.2f} in ({worst_side} edge, page {worst_page}).",
+        ]
+        for profile, pages in grouped[:MAX_SUMMARY_GROUPS]:
+            sides = ", ".join(f"{side} {v:.2f} in" for side, v in profile)
+            summary.append(f"{pages_label(pages, total)}: {sides}.")
+        if len(grouped) > MAX_SUMMARY_GROUPS:
+            rest = sorted(n for _, pages in grouped[MAX_SUMMARY_GROUPS:] for n in pages)
+            summary.append(f"{len(rest)} more page(s) with other measurements ({format_pages(rest)}) — "
+                           "see the page-by-page details.")
+        groups = [{"pages": pages, "sides": dict(profile)} for profile, pages in grouped]
         return CheckResult("Minimum margins", FAIL, requirement, actual, details,
                            problem_pages=problem_pages, review_pages=review_pages,
-                           highlights=highlights)
+                           highlights=highlights, summary=summary, groups=groups)
     if review_pages:
         return CheckResult(
             "Minimum margins", NEEDS_REVIEW, requirement, actual,
@@ -447,6 +539,9 @@ def check_pdf(pdf_bytes: bytes, requirements: Requirements, file_name: str = "do
         if value is not None:
             result = run(value)
             result.limit = value
+            result.total_pages = page_count
+            if not result.summary:
+                result.summary = list(result.details)  # short results are already one line
             results.append(result)
 
     return PDFReport(file_name=file_name, page_count=page_count,

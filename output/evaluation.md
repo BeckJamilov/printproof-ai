@@ -136,3 +136,47 @@ are claimed until those results are in.
 .\.venv\Scripts\python.exe -m pytest tests/test_evaluation.py  # same comparison as automated tests
 .\.venv\Scripts\python.exe tests/evaluation.py --ai C02 C07  # real AI runs (uses Portkey credits)
 ```
+
+## 7. Additional real-world document (follow-up after Step 6 — not fully verified)
+
+After the main evaluation, the author tested PrintProof with a **real document that was not
+generated for this project** and is **not** one of the 13 evaluation PDFs above.
+
+| Item | Value (as reported by the author) |
+|---|---|
+| Document | `Power_primers_1-4_simple_version.pdf` — a real 32-page PDF |
+| Mode | Manual mode |
+| Requirements selected | Maximum 5 pages · US Letter paper · minimum 10 pt font · minimum 1 inch margins |
+| Page count | **Fail** — 32 pages instead of at most 5 |
+| Paper size | **Fail** — A4 instead of US Letter |
+| Minimum font size | **Fail** — smallest font 7.8 pt instead of at least 10 pt |
+| Minimum margins | **Fail** — smallest margin 0.31 in instead of at least 1 in |
+| HTML report | Downloaded and opened; results, recommendations and embedded page previews displayed correctly |
+
+**What this shows:** PrintProof processed a real, independently created 32-page PDF without errors,
+produced a result for all four requirements and generated a working HTML report.
+
+**What it does not show:** the font sizes and margins in the original PDF were **not** measured
+independently (for example with Adobe Acrobat's measuring tool), so we cannot say whether the four
+findings are exactly right. This test is therefore **not counted** in the accuracy figures above
+(52 / 52 on 13 generated files) and is not described as a verified accuracy test. Independent
+verification is **pending**. The original PDF and the report downloaded from it are not part of the
+repository.
+
+**What it changed:** the test showed that the HTML report repeated almost identical lines for every
+page (for example “A4” 32 times). The app and the report now group identical results — e.g.
+“All 32 pages are A4, 8.27 × 11.69 in (210 × 297 mm) — not US Letter” — show the smallest
+margin/font with the affected pages and a few examples, and keep the full page-by-page list in an
+expandable section. The fix suggestions are grouped the same way. This is covered by the new
+regression tests in `tests/test_grouping.py` (many pages, repeated problems, different measurements on
+different pages, and a check that grouping never hides a problem page).
+
+On a generated 32-page stand-in with similar problems (kept outside the repository), the downloaded
+report's visible “What was found / How to fix it” bullets went from **173 to 20**, with all 83
+page-by-page lines still available in the expandable sections. The report printed to 8 US Letter
+pages and opened offline with all 6 page previews.
+
+AI mode was also run once on the generated 32-page stand-in (run `6685105933e6`, Portkey cache MISS):
+the AI report matched the measured results (4 × Fail), using 2 API calls and **5,532 tokens**
+(5,008 input / 524 output) — about 1,000 more input tokens than runs on 1–8 page documents, because the
+tool results list more page numbers.

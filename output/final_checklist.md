@@ -108,3 +108,18 @@ Both temporary test folders (and the copies of `.env` used for testing) were del
 - ⏳ Student test (procedure and form ready in `output/user_testing.md` and `output/user_test_results.csv`).
 - ⏳ Independent real-world PDF testing (no independent PDFs available in the project).
 - ℹ️ No public app link — the app runs locally; none is claimed.
+
+## 8. Follow-up after Step 6 — grouped results and real-world test
+
+| Check | Result |
+|---|---|
+| Real-world document (author's test) | `Power_primers_1-4_simple_version.pdf`, 32 pages, manual mode, max 5 pages / US Letter / 10 pt / 1 in → PrintProof reported 4 failures (32 pages, A4, 7.8 pt, 0.31 in). Processed successfully; measurements **not independently verified**; not counted in the accuracy figures; the PDF and its report are **not** in the repository |
+| Grouped results in the app | ✅ Identical problems reported once (e.g. “All 32 pages are A4 …”), smallest margin/font with affected pages and examples; every page still listed under “Page-by-page details” |
+| Grouped HTML report and fixes | ✅ On a generated 32-page stand-in: visible findings + fixes 173 → 20 lines; 83 page-by-page lines kept in expandable sections; 8 printed pages; offline; 6 / 6 previews |
+| Sample reports | ✅ good sample and problem sample reports generated and opened offline |
+| Regression tests | ✅ `tests/test_grouping.py` (8 tests): many identical pages, different measurements per page, mixed paper sizes, font summary, fixes not repeated, report length, no problem page hidden |
+| All automated tests | ✅ **69 passed, 4 skipped** |
+| Manual and AI modes | ✅ manual mode on both samples and the 32-page stand-in (uploaded through the real file input); AI mode run `6685105933e6` on the stand-in: AI report matched the measurements (5,532 tokens, Portkey cache MISS) |
+| report.html | ✅ Impact and Limitations updated; **14** printed US Letter pages; offline; 5 / 5 images |
+| slides.html | ✅ one phrase added to slide 6; **10** slides; nothing cut off; arrow keys and fullscreen work |
+| Evidence files | ✅ `output/evaluation.md` §7, `output/project_evidence.md` §1.9, `output/tokenomics.md` §7 |

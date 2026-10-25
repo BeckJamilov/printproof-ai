@@ -43,8 +43,8 @@ Per call (fresh runs):
 **Observation:** about 90% of tokens are **input**, and most of that is the same agent instructions
 (`prompts/prompt.md`) and tool/output definitions sent twice. The PDF itself is never sent, so the
 token count barely depends on document length: only the lists of problem page numbers grow (detail
-lines are capped at 10 per check). All measured runs used 1–8 page documents, so very long
-documents were not measured.
+lines are capped at 10 per check). The runs above used 1–8 page documents; a later run on a 32-page
+document used about 1,000 more input tokens (see §7).
 
 Cache hits returned the same token counts as the original call (4,364–4,632) in 0.7–1.7 s.
 
@@ -133,3 +133,17 @@ syllabus, a printer's email), use mixed units, or include rules PrintProof canno
 makes those visible instead of silently skipping them. For a student who already knows the four
 numbers, manual mode is faster, free, works offline, and gives exactly the same results.
 Whether real users actually prefer AI mode has **not** been measured yet (see `output/user_testing.md`).
+
+## 7. Runs after this analysis (Step 6 and follow-up)
+
+The statistics above cover the 17 runs of Steps 2–3. Later runs, all in `output/audit_trail.json`:
+
+| Run | Purpose | Tokens (in / out) | Portkey cache |
+|---|---|---|---|
+| `0b134c84cd88` | Fresh-install test (local clean clone) | 4,632 (4,081 / 551) | HIT, HIT → 0 new model tokens |
+| `b8b8cf05907f` | Fresh-clone test from GitHub | 4,632 (4,081 / 551) | HIT, HIT → 0 new model tokens |
+| `6685105933e6` | AI mode on a generated 32-page test document | **5,532 (5,008 / 524)** | MISS, MISS |
+
+The 32-page run shows that token use does grow somewhat with document length: the tool results list
+more problem page numbers (detail lines are capped at 10 per check). At list price this run cost about
+$0.0008 instead of the $0.0006 average — still well under a tenth of a cent.

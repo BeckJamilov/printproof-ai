@@ -78,8 +78,10 @@ without its first-run email question and without opening a tab automatically.) S
 2. Turn on the requirements you need and set the values (default: max 5 pages, US Letter,
    minimum 10 pt text, 1 inch margins).
 3. Upload a PDF — or click **✅ Good sample** or **⚠️ Problem sample** to try the included files.
-4. Read the verdict and the result cards. The tabs show a **Page preview** (problem areas
-   highlighted) and **Page-by-page data**.
+4. Read the verdict and the result cards. When the same problem appears on many pages it is
+   reported once (e.g. "All 32 pages are A4 … — not US Letter"), with the smallest measurement,
+   the affected pages and a few examples; open **Page-by-page details** on a card to see every page.
+   The tabs show a **Page preview** (problem areas highlighted) and **Page-by-page data**.
 5. Click **⬇ Download HTML report** for a standalone report with fix suggestions.
 
 ### AI mode (needs `PORTKEY_API_KEY`)
@@ -105,7 +107,7 @@ Offline tests (free, no API calls, about 10 seconds):
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-Expected result: `61 passed, 4 skipped`. The 4 skipped tests make real Portkey calls and only run
+Expected result: `69 passed, 4 skipped`. The 4 skipped tests make real Portkey calls and only run
 on request (about 4,000–5,000 tokens each):
 
 ```powershell

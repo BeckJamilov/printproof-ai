@@ -37,8 +37,9 @@ def test_report_is_standalone_html():
 
 def test_bad_sample_report_has_measurements_pages_and_fixes():
     _, html = make(BAD, name="bad_sample.pdf")
-    for text in ["bad_sample.pdf", "6 pages", "page 6", "Page 2 is A4", "must be US Letter",
-                 "Page 3: the smallest text is 7.0 pt", "Increase it to at least 10 pt",
+    for text in ["bad_sample.pdf", "6 pages", "page 6", "Page 2 is A4", "Change page 2 to US Letter",
+                 "Increase all text to at least 10 pt", "the smallest is 7.0 pt on page 3",
+                 "Text smaller than 10 pt on pages 3, 6", "Page-by-page details",
                  "Page 4: move content further from the left edge by 0.75 in", "Shorten the document by at least 1 page"]:
         assert text in html, text
 

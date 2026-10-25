@@ -131,6 +131,10 @@ div[data-testid="stExpander"] { background: var(--panel); border: 1px solid var(
 .details { margin: 12px 0 0; padding: 0; list-style: none; }
 .details li { padding: 7px 10px; margin-top: 6px; border-radius: 10px; background: var(--panel-2); font-size: .88rem; color: #dcd9e2; }
 .pages { margin-top: 10px; font-size: .85rem; color: var(--pink-soft); font-weight: 600; }
+details.per-page { margin-top: 10px; }
+details.per-page summary { cursor: pointer; color: var(--muted); font-size: .85rem; font-weight: 600; }
+details.per-page summary:hover { color: var(--pink-soft); }
+details.per-page ul.details { max-height: 260px; overflow-y: auto; }
 
 .empty { text-align:center; padding: 54px 24px; border-radius: 20px; border: 1px dashed var(--line); background: var(--panel); color: var(--muted); }
 .empty h3 { color: var(--text); margin-bottom: 6px; }
@@ -261,7 +265,13 @@ def document_tiles(report, page_limit) -> list[tuple[str, str, str]]:
 
 def render_result_card(result, ai_explanation: str | None = None) -> None:
     cls = STATUS_CLASS[result.status]
-    details = "".join(f"<li>{esc(d)}</li>" for d in result.details)
+    # Grouped summary first; one line per page only inside the expandable section.
+    details = "".join(f"<li>{esc(d)}</li>" for d in (result.summary or result.details))
+    per_page = ""
+    if len(result.details) > 1:
+        rows = "".join(f"<li>{esc(d)}</li>" for d in result.details)
+        per_page = (f'<details class="per-page"><summary>Page-by-page details ({len(result.details)} lines)'
+                    f'</summary><ul class="details">{rows}</ul></details>')
     page_bits = []
     if result.problem_pages:
         page_bits.append(f"Problems on {format_pages(result.problem_pages)}")
@@ -280,6 +290,7 @@ def render_result_card(result, ai_explanation: str | None = None) -> None:
   </div>
   {f'<div class="pages">{esc(" · ".join(page_bits))}</div>' if page_bits else ''}
   {f'<ul class="details">{details}</ul>' if details else ''}
+  {per_page}
   {ai_html}
 </div>
 """,
