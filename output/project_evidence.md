@@ -51,7 +51,7 @@ LaTeX or scanners (see §3).
 Source: `output/audit_trail.json`, `output/evaluation_results.json`.
 
 - 17 AI runs recorded: **10 fresh**, **5 Portkey cache hits**, **2 rejected** before the model ran.
-- **Every one of the 18 completed runs reported the same statuses as the Python checker** (15 in Steps 2–3, 3 in Step 6 and the follow-up); the output
+- **Every one of the 21 completed runs reported the same statuses as the Python checker** (15 in Steps 2–3, 6 in Step 6 and the follow-ups); the output
   validator never had to reject a real model's report.
 - AI interpretation tested with different wording, e.g. "A4 paper only … 20 mm margins" →
   `check_paper_size("A4")`, `check_min_margins(20, "mm")` (run `e976db5da5cd`); unclear and
@@ -132,6 +132,12 @@ downloaded HTML report displayed the results, recommendations and page previews 
   figures. The original PDF and its report are not in the repository.
 - **Result:** the test exposed repetitive per-page output, which was fixed (grouped results with an
   expandable page-by-page section; see `output/evaluation.md` §7).
+- **AI mode on the same PDF (author's runs, checked in the Agent trace):** run `cc1f26285f42` (4 standard
+  rules) and run `e1e9cfdfd2c3` (same rules + “double-spaced”) both called the four tools with the correct
+  arguments and reported the same 4 failures as manual mode; double spacing was marked **Not checkable**.
+  5,866 and 5,998 tokens, 2 API calls each, Portkey cache MISS. This is **observed agreement between AI
+  and manual mode** (expected, since both use the same checker), not independent verification of the
+  measurements.
 
 ### 1.7 Market research — sourced
 
@@ -164,8 +170,8 @@ verified (see `output/tokenomics.md` §2).
 | ✅ Supported by evidence | ❌ Not supported (do not claim) |
 |---|---|
 | Found all 14 designed problems in 13 generated test PDFs with no false alarms | "100% accurate on real documents" |
-| Processed a real 32-page PDF and produced a working report with 4 reported failures | "All four findings on the real document were confirmed" |
-| AI mode returned the same statuses as the Python checker in all 18 completed runs | "AI improves measurement accuracy" |
+| Processed a real 32-page PDF; AI mode and manual mode reported the same 4 failures | "All four findings on the real document were confirmed" / "AI agreement proves the measurements" |
+| AI mode returned the same statuses as the Python checker in all 21 completed runs | "AI improves measurement accuracy" |
 | The AI never receives the PDF; hidden instructions in a PDF did not reach it (1 real test) | "PrintProof is immune to prompt injection" |
 | An AI analysis used about 4,460 tokens (~$0.0006 at list price) | Any real-user time savings (not measured yet) |
 | Unclear and unsupported requirements are listed instead of guessed (tested) | "No other tool does this" / "first of its kind" |

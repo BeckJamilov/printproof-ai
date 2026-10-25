@@ -180,3 +180,28 @@ AI mode was also run once on the generated 32-page stand-in (run `6685105933e6`,
 the AI report matched the measured results (4 × Fail), using 2 API calls and **5,532 tokens**
 (5,008 input / 524 output) — about 1,000 more input tokens than runs on 1–8 page documents, because the
 tool results list more page numbers.
+
+### AI mode on the same real document (observed agreement, not verified accuracy)
+
+The author also ran **AI mode** twice on `Power_primers_1-4_simple_version.pdf` and checked the Agent
+trace in the app. Both runs are in `output/audit_trail.json`:
+
+| | Run `cc1f26285f42` | Run `e1e9cfdfd2c3` |
+|---|---|---|
+| Requirements typed | “maximum 5 pages, US Letter paper, at least 10 pt font and 1 inch margins” | “The document should have no more than 5 pages, use US Letter paper, have a minimum font size of 10 pt and at least 1 inch margins on all sides. It should also be double-spaced.” |
+| Tools called (arguments) | `check_page_limit(5)`, `check_paper_size("US Letter")`, `check_min_font_size(10)`, `check_min_margins(1, "in")` | the same four, same arguments |
+| Results | 4 × **Fail**: 32 pages · A4 · smallest text 7.8 pt · tightest margin 0.31 in (bottom) | the same 4 × **Fail** |
+| Unsupported requirement | — | “double-spaced” → **Not checkable**, with a request to verify line spacing manually; no tool was called for it |
+| AI report vs measured results | matched (validator passed) | matched (validator passed) |
+| Usage | 2 API calls · 4 tool calls · 5,866 tokens (5,375 in / 491 out) · 9.5 s | 2 API calls · 4 tool calls · 5,998 tokens (5,421 in / 577 out) · 16.8 s |
+| Portkey cache | MISS, MISS | MISS, MISS |
+
+**What this shows:** on a real, independently created document the AI understood both phrasings,
+chose the correct tool arguments, reported exactly the same four results as manual mode, and did not
+guess an unsupported rule (double spacing).
+
+**What it does not show:** agreement between AI mode and manual mode is expected by design, because
+both use the same Python checker. It confirms the AI's interpretation and reporting, **not** that
+32 pages / A4 / 7.8 pt / 0.31 in are correct measurements of the original PDF — those values have still
+**not been verified independently**. These runs are not part of the 13-case evaluation and do not
+change its statistics (52 / 52).

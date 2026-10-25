@@ -123,3 +123,4 @@ Both temporary test folders (and the copies of `.env` used for testing) were del
 | report.html | ✅ Impact and Limitations updated; **14** printed US Letter pages; offline; 5 / 5 images |
 | slides.html | ✅ one phrase added to slide 6; **10** slides; nothing cut off; arrow keys and fullscreen work |
 | Evidence files | ✅ `output/evaluation.md` §7, `output/project_evidence.md` §1.9, `output/tokenomics.md` §7 |
+| AI mode on the real 32-page PDF (author's runs) | ✅ found in the audit trail: `cc1f26285f42` (5,866 tokens, 9.5 s) and `e1e9cfdfd2c3` with “double-spaced” (5,998 tokens, 16.8 s); both MISS, both matched manual mode (4 × Fail), double spacing Not checkable. Recorded as **observed agreement**, not verified accuracy, in evaluation.md, project_evidence.md, tokenomics.md, report.html (Impact, Tokenomics) and slide 6. Report still **14** pages, slides **10** |

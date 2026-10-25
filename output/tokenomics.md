@@ -143,7 +143,15 @@ The statistics above cover the 17 runs of Steps 2–3. Later runs, all in `outpu
 | `0b134c84cd88` | Fresh-install test (local clean clone) | 4,632 (4,081 / 551) | HIT, HIT → 0 new model tokens |
 | `b8b8cf05907f` | Fresh-clone test from GitHub | 4,632 (4,081 / 551) | HIT, HIT → 0 new model tokens |
 | `6685105933e6` | AI mode on a generated 32-page test document | **5,532 (5,008 / 524)** | MISS, MISS |
+| `cc1f26285f42` | Author's AI run on a real 32-page PDF (4 standard rules) | **5,866 (5,375 / 491)**, 9.5 s | MISS, MISS |
+| `e1e9cfdfd2c3` | Author's AI run on the same PDF, rules + “double-spaced” | **5,998 (5,421 / 577)**, 16.8 s | MISS, MISS |
 
-The 32-page run shows that token use does grow somewhat with document length: the tool results list
-more problem page numbers (detail lines are capped at 10 per check). At list price this run cost about
-$0.0008 instead of the $0.0006 average — still well under a tenth of a cent.
+One more AI run by the author on another real PDF (11 pages, run `1e735d1a8568`, 5,579 tokens, MISS) is also
+in the audit trail; it is not described as evidence here.
+
+The 32-page runs show that token use grows somewhat with document length: the tool results list more
+problem page numbers (detail lines are capped at 10 per check). The two runs on the real 32-page PDF used
+5,866 and 5,998 tokens — about 1,400 more input tokens than the 3,991 input average on 1–8 page documents. At
+list price that is about $0.0008 per analysis instead of $0.0006, still well under a tenth of a cent. The
+second run took longer (16.8 s vs 9.5 s) while using a similar number of tokens; response time varies
+between runs and was not studied further.
