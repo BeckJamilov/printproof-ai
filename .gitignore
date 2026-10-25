@@ -1,0 +1,23 @@
+# Secrets — never commit API keys
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local tool and editor settings
+.claude/
+.vscode/
+.idea/
+
+# Temporary and OS files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
