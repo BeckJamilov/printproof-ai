@@ -129,7 +129,7 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
     <tr><td>Every request</td><td>Hide rows with zero amounts, keep the totals and comments, adjust widths and wrapping, choose paper and orientation, and print again until the pages are readable</td></tr>
   </table>
   <p>By his own informal estimate this preparation takes <b>about five minutes per printout, sometimes longer</b>, and the requests often come under tight deadlines. It is repetitive work that needs attention but little judgement once he knows which columns the meeting needs.</p>
-  <p>That conversation redirected our development. The PDF Checker verifies a finished document; the harder and more time-consuming task is <b>preparing the document correctly in the first place</b>. We therefore built <b>Excel Print Optimizer</b> and made it the main tool: he states the columns for this request and the columns that decide which rows matter, and the app filters the rows, keeps totals, units and comments, lays out the table, renders real PDFs and verifies them, while he turns his attention to other work. The PDF Checker remains the second step of the same workflow. This is a qualitative user insight: the five-minute figure is his informal estimate, not a measurement; he did not formally test the finished product, and we do not claim measured time savings.</p>
+  <p>That conversation redirected our development. The PDF Checker verifies a finished document; the harder and more time-consuming task is <b>preparing the document correctly in the first place</b>. We therefore built <b>Excel Print Optimizer</b> and made it the main tool: he states the columns for this request and the columns that decide which rows matter, and the app filters the rows, keeps totals, units and comments, lays out the table, renders real PDFs and verifies them, while he turns his attention to other work. The PDF Checker remains the second step of the same workflow. This is a qualitative user insight: the five-minute figure is his informal estimate, not a measurement, and we do not claim measured time savings. Later he also tried the finished tool himself (Section 7).</p>
 
   <h3>Why large budget workbooks are hard to print</h3>
   <ul>
@@ -239,7 +239,10 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
 <!-- ============ 7. IMPACT ============ -->
 <section id="impact" class="newpage">
   <h2><span class="num">7</span>Impact</h2>
-  <p>The practical problem is common wherever large financial workbooks are reviewed on paper or as PDFs: budget meetings, investment committees, project reviews. Excel Print Optimizer replaces a manual, trial-and-error preparation with one form and a verified result, while keeping the numbers exactly as Excel calculated them. For the workflow in Section 2 (a new printed view of a changing master budget for each meeting) the user's part shrinks to choosing columns and settings; the filtering, layout and checking that he estimates at about five minutes or more per printout run automatically. We have not measured time savings with real users; the evidence below is technical.</p>
+  <p>The practical problem is common wherever large financial workbooks are reviewed on paper or as PDFs: budget meetings, investment committees, project reviews. Excel Print Optimizer replaces a manual, trial-and-error preparation with one form and a verified result, while keeping the numbers exactly as Excel calculated them. For the workflow in Section 2 (a new printed view of a changing master budget for each meeting) the user's part shrinks to choosing columns and settings; the filtering, layout and checking that he estimates at about five minutes or more per printout run automatically. We have not measured time savings; the evidence below is mostly technical, plus one user's feedback.</p>
+
+  <h3>Feedback from the person who inspired the tool</h3>
+  <p><span class="label t-est">Qualitative</span> The former colleague whose first conversation with us gave the idea for Excel Print Optimizer later tried the finished tool himself. His feedback was positive: he liked it, said it works well and found it useful for his work with large Excel budgets. He also noted that entering Excel column letters such as B or J takes some getting used to; choosing columns by their names is now a planned improvement (Section 8). This is one person's informal feedback, not a user study: we report no quotes or measured time savings, and no other users have tried the tool yet.</p>
 
   <h3>How much we tested</h3>
   <p><span class="label t-meas">Measured</span> Every Excel scenario below was rendered by Microsoft Excel into a real PDF and measured. The categories overlap in what they cover, so we report them separately instead of adding them into one total.</p>
@@ -248,7 +251,7 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
     <tr><td>Round 1 QA scenarios (before fixes)</td><td class="num">48</td><td>24 main configurations, 11 targeted, 3 synthetic-workbook, 5 cross-checks and 5 supplemental (filter columns, formulas); one measured PDF each</td></tr>
     <tr><td>Round 2 reruns (after fixes)</td><td class="num">44</td><td>The same scenarios rerun, not new ones (only 1 cross-check was still needed); 43 of 44 passed</td></tr>
     <tr><td>Targeted rerun of the last failure</td><td class="num">1</td><td>Page Count First font fix confirmed: 11.76 pt → 13.32 pt</td></tr>
-    <tr><td>Automated test suite</td><td class="num">171</td><td>98 for the Excel tool (49 unit, 11 layout-search, 15 integration and 23 regression tests; the integration and regression tests drive Excel on synthetic workbooks) and 73 for the PDF Checker; 167 pass, and 4 live-AI tests run only on request</td></tr>
+    <tr><td>Automated test suite</td><td class="num">167 + 4</td><td>98 for the Excel tool (49 unit, 11 layout-search, 15 integration and 23 regression tests; the integration and regression tests drive Excel on synthetic workbooks) and 73 for the PDF Checker: <b>167 passed, 4 skipped</b> (live-AI tests that run only on request)</td></tr>
     <tr><td>Checks in the running app</td><td class="num">—</td><td>The reported A4 portrait case, the demo workbook, and a fresh clone of the repository</td></tr>
   </table>
   <p>The process was iterative: <b>test on real PDFs → find the failure → fix the underlying cause → rerun the same scenarios</b>. The scenarios covered A3 and A4, portrait and landscape, three margin presets, both optimization modes, filtering rules (zeros, hidden and unprinted filter columns), formulas, merged titles, comments, numbering and financial values.</p>
@@ -292,7 +295,7 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
       <h3 style="margin-top:4px">Limits</h3>
       <ul>
         <li><b>Windows and Microsoft Excel required</b> for the Excel tool; LibreOffice is not supported, so it cannot run on a normal cloud host. No public deployment exists.</li>
-        <li><b>Limited external validation:</b> one real workbook and synthetic workbooks; no independent users have tested it yet.</li>
+        <li><b>Limited external validation:</b> one real workbook and synthetic workbooks; one user (the colleague who inspired the tool) has tried it, with positive informal feedback, but there has been no wider user testing.</li>
         <li><b>Formats:</b> <code>.xlsx</code> and <code>.xlsm</code> only (no <code>.xls</code>, <code>.xlsb</code>, <code>.ods</code>); password-protected sheets, charts and images are not handled; only the first area of a multi-area print area is used.</li>
         <li><b>Heuristics:</b> row relevance, hierarchy and metadata detection follow general rules that may not match every workbook; uncertain decisions are shown for review.</li>
         <li><b>Speed:</b> 0.5–5 minutes per optimization, because several real PDFs are exported and measured.</li>
@@ -302,7 +305,8 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
     <div>
       <h3 style="margin-top:4px">Next steps</h3>
       <ul>
-                <li>Test with finance users on their own (non-confidential) workbooks and measure preparation time before and after.</li>
+                <li>Choose columns by their header names instead of Excel letters, the one usability issue our colleague raised.</li>
+        <li>Show the tool to more former colleagues in finance and measure preparation time before and after on their own workbooks.</li>
         <li>A renderer that works without Microsoft Excel, so the tool can be hosted.</li>
         <li>Saved presets per report type (“monthly budget review”), and checking an optimized PDF directly against a submission's rules with the PDF Checker.</li>
         <li>Broader format support and colour checks.</li>

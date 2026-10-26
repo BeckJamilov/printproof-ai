@@ -28,8 +28,10 @@ figures and other irrelevant columns. Every time he also hides zero rows, keeps 
 adjusts formatting and makes the table fit readable pages. By his informal estimate this takes about
 five minutes per printout, sometimes longer, often under deadline. That conversation redirected the
 project: Excel Print Optimizer does this preparation automatically, and the PDF Checker still checks
-documents that already exist. (This is a qualitative user insight: the five minutes are his estimate,
-not a measurement; he did not test the finished tool, and we report no measured time savings.)
+documents that already exist. Later he tried the finished tool himself: his feedback was positive, and he
+found it useful for his work with large Excel budgets. He noted that entering column letters takes some
+getting used to, so choosing columns by name is a planned improvement. (This is one person's informal
+feedback; the five minutes are his estimate, not a measurement, and we report no measured time savings.)
 
 ## System requirements
 

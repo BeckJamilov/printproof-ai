@@ -141,7 +141,7 @@ svg { width: 100%; height: auto; display: block; }
     <div class="card"><div class="n">2</div><h3>A colleague's real problem</h3><p>A master budget workbook, revised often; management wants <b>printed tables</b> for meetings — annual view one day, quarterly the next. Pick columns, hide zero rows, keep totals and comments, fit the page: <b>~5 min or more</b> each time.</p></div>
     <div class="card pinkline"><div class="n">3</div><h3>Excel Print Optimizer</h3><p>Prepare the document correctly in the first place — and keep the PDF Checker for documents that already exist.</p></div>
   </div>
-  <p style="font-size:21px; margin-top:26px" class="muted">Qualitative user insight; ~5 min is his informal estimate, not a measurement. He did not test the finished tool; no time savings are claimed.</p>
+  <p style="font-size:21px; margin-top:26px" class="muted">Qualitative user insight; ~5 min is his informal estimate, not a measurement. Later he tried the finished tool himself: positive feedback. No time savings are claimed.</p>
 </section>
 
 <!-- 4. The transformation -->
@@ -221,7 +221,7 @@ svg { width: 100%; height: auto; display: block; }
     <tr><td>A4 landscape, Readability First 8 pt</td><td class="no">4 pages, grand total alone</td><td class="yes">3 pages (2 after final fix)</td></tr>
     <tr><td>Formula table: printed numbers vs Excel's own results</td><td colspan="2" class="yes">44 / 44 and 22 / 22 cells identical — negatives, %, zeros, subtotals</td></tr>
   </table>
-  <p style="font-size:17px; margin-top:8px" class="muted">Plus 171 automated tests (98 for the Excel tool, incl. 23 regression) · PDF Checker 52/52 checks on 13 designed PDFs, 0 false positives. One real workbook + synthetic ones — no statistical accuracy claim.</p>
+  <p style="font-size:17px; margin-top:8px" class="muted">Automated test suite: <b>167 passed, 4 skipped</b> (live-AI tests, run on request), incl. 23 Excel regression tests · PDF Checker 52/52 checks on 13 designed PDFs, 0 false positives. One real workbook + synthetic ones — no statistical accuracy claim.</p>
 </section>
 
 <!-- 9. Safety -->
@@ -241,9 +241,9 @@ svg { width: 100%; height: auto; display: block; }
   <div class="kicker">Value, limits, next steps</div>
   <h2>Prepare → verify → check</h2>
   <div class="grid3" style="margin-top:10px">
-    <div class="card pinkline"><h3>Value</h3><p>One form instead of repeated hide-resize-print cycles; the largest readable layout; context and numbers preserved; every PDF measured.</p></div>
+    <div class="card pinkline"><h3>Value</h3><p>One form instead of repeated hide-resize-print cycles; the largest readable layout; context and numbers preserved; every PDF measured. The colleague who inspired it tried it: positive feedback.</p></div>
     <div class="card"><h3>Limits</h3><p>Needs Windows + Microsoft Excel; no public deployment; tested on one real and several synthetic workbooks; .xlsx/.xlsm only; 0.5–5 min per run.</p></div>
-    <div class="card"><h3>Next</h3><p>Test with finance users and measure time · a renderer without Excel · saved report presets.</p></div>
+    <div class="card"><h3>Next</h3><p>Choose columns by name, not letter · show it to more colleagues and measure time · a renderer without Excel.</p></div>
   </div>
   <p style="font-size:22px; margin-top:26px">Try it: <code>streamlit run app.py</code> → Excel Print Optimizer · demo workbook <code>demo/Synthetic_Capital_Plan_2027.xlsx</code> · <a href="https://github.com/BeckJamilov/printproof-ai">github.com/BeckJamilov/printproof-ai</a></p>
 </section>
