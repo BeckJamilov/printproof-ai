@@ -6,3 +6,7 @@ headless = true
 
 [browser]
 gatherUsageStats = false
+
+[client]
+# Pages are linked from the sidebar with clear names instead of Streamlit's automatic list.
+showSidebarNavigation = false

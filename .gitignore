@@ -21,3 +21,12 @@ __pycache__/
 *.tmp
 .DS_Store
 Thumbs.db
+
+# Excel Print Optimizer: private workbooks and generated financial documents — never commit
+excel_samples/
+*.xlsx
+*.xlsm
+*.xls
+*.xlsb
+*.ods
+excel_output/

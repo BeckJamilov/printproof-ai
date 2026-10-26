@@ -11,5 +11,9 @@ pydantic-ai-slim[openai]==2.56.0
 openai==3.31.0
 httpx2==2.16.0
 
+# Excel Print Optimizer (Windows + Microsoft Excel as the rendering engine)
+pywin32==312; sys_platform == "win32"
+openpyxl==3.1.5
+
 # Tests
 pytest==9.1.1

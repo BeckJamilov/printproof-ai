@@ -2,19 +2,40 @@
 
 MGT 409 (AI Foundations for Managers) final project · Beck Jamilov · Yale SOM, Fall 2026
 
-PrintProof AI checks whether a PDF is ready to print or submit. You upload a PDF, give the
-requirements — with switches (**Manual mode**) or in plain English (**AI mode**) — and the app
-measures the real file and reports **Pass**, **Fail** or **Needs Review** for each requirement, with
-the actual measurements, the page numbers where problems were found, and fix suggestions.
+PrintProof AI helps people get documents ready to print. It has two tools in one app:
 
-It checks four kinds of rules: maximum number of pages, paper size (US Letter or A4), minimum font
-size and minimum margins. The measuring is always done by Python (PyMuPDF); in AI mode a PydanticAI
-agent using **gpt-6-luna through Portkey** only translates the written requirements into these checks.
+1. **Excel Print Optimizer** (main tool) — turns a large Excel worksheet into a concise, readable PDF.
+   You choose the columns to print and the columns that decide whether a row matters; the app leaves
+   out irrelevant rows while keeping titles, units, section headings, subtotals and comments, renumbers
+   the printed items, sets column widths and wrapping, picks the scale and page breaks, and then
+   **measures the real PDF** before calling it verified.
+2. **PDF Checker** (second tool) — checks a PDF that already exists against page, paper, font and
+   margin requirements, set with switches or written in plain English for an AI agent.
 
 - **Final report:** [`report.html`](report.html) · **Slides:** [`slides.html`](slides.html)
-  (download and open by double-clicking; everything is embedded)
+  (download and open by double-clicking; everything is embedded and works offline)
 - **Repository:** https://github.com/BeckJamilov/printproof-ai
-- **App link:** none — the app runs locally (see Quick start)
+- **App link:** none — the app runs locally (see Quick start). There is no public deployment.
+
+## Why it exists
+
+We first built the PDF Checker, which verifies a finished document. When we showed it to a former
+colleague who works with large investment budgets and financial reports, it became clear that his more
+frustrating problem came *before* the PDF existed: very large Excel workbooks with many rows, many
+financial columns, sections, subtotals and comments, where a useful printout meant hiding columns,
+filtering rows, changing widths and wrapping, choosing paper and orientation, and printing again and
+again until the result was readable. That conversation redirected the project: Excel Print Optimizer
+prepares the document correctly in the first place, and the PDF Checker still checks documents that
+already exist. (The colleague's feedback was qualitative motivation; he did not test the finished tool,
+and we report no measured time savings.)
+
+## System requirements
+
+| Tool | Needs |
+|---|---|
+| Excel Print Optimizer | **Windows** with **Microsoft Excel** installed (Excel renders the PDF; the built-in "Microsoft Print to PDF" printer is used). It does not run on a normal cloud host without Excel. |
+| PDF Checker, Manual mode | Any computer with Python — no Excel, no API key |
+| PDF Checker, AI mode | A Portkey API key (`PORTKEY_API_KEY`) |
 
 ## Quick start (Windows PowerShell)
 
@@ -37,10 +58,10 @@ py -m venv .venv
 If `py` is not found, use `python -m venv .venv` instead. All other commands call the virtual
 environment's Python directly, so you never need to activate it.
 
-**3. Add the Portkey API key** (only needed for AI mode)
+**3. Add the Portkey API key** (only needed for AI mode of the PDF Checker)
 
-The app reads `PORTKEY_API_KEY` from a `.env` file. It looks in the project folder first and then
-in the **folder one level above**, so either of these works:
+The app reads `PORTKEY_API_KEY` from a `.env` file in the project folder or in the **folder one level
+above**:
 
 ```
 some-folder/
@@ -50,14 +71,8 @@ some-folder/
     └── app.py
 ```
 
-The `.env` file contains one line:
-
-```
-PORTKEY_API_KEY=your-portkey-api-key-here
-```
-
-To create option B from the template: `Copy-Item .env.example .env` and then edit the key.
-`.env` is in `.gitignore` and is never committed. Manual mode works without any key.
+The `.env` file contains one line: `PORTKEY_API_KEY=your-portkey-api-key-here`.
+To create option B: `Copy-Item .env.example .env` and edit the key. `.env` is never committed.
 
 **4. Start the app**
 
@@ -65,123 +80,122 @@ To create option B from the template: `Copy-Item .env.example .env` and then edi
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-When PowerShell shows `You can now view your Streamlit app in your browser`, open
-**http://localhost:8501** in your browser. (The project's `.streamlit/config.toml` starts Streamlit
-without its first-run email question and without opening a tab automatically.) Stop the app with
-**Ctrl+C** in PowerShell.
+Open **http://localhost:8501**. The app opens on **Excel Print Optimizer**; the **PDF Checker** is one
+click away in the sidebar. Stop the app with **Ctrl+C**. After updating the code, restart the app —
+a running Streamlit process keeps the code it loaded at start.
 
-## How to use it
+## Reviewer walkthrough (about 5 minutes)
 
-### Manual mode (no API key needed)
+**A. Excel Print Optimizer** (Windows with Microsoft Excel)
 
-1. Leave **Check mode** on **Manual** in the left sidebar.
-2. Turn on the requirements you need and set the values (default: max 5 pages, US Letter,
-   minimum 10 pt text, 1 inch margins).
-3. Upload a PDF — or click **✅ Good sample** or **⚠️ Problem sample** to try the included files.
-4. Read the verdict and the result cards. When the same problem appears on many pages it is
-   reported once (e.g. "All 32 pages are A4 … — not US Letter"), with the smallest measurement,
-   the affected pages and a few examples; open **Page-by-page details** on a card to see every page.
-   The tabs show a **Page preview** (problem areas highlighted) and **Page-by-page data**.
-5. Click **⬇ Download HTML report** for a standalone report with fix suggestions.
+> **Pending:** the public demonstration workbook (a sanitized, fully synthetic budget workbook) will be
+> added to `demo/` after review. Until then this walkthrough works with any `.xlsx` budget sheet of your
+> own; no workbook is included in the repository yet.
 
-### AI mode (needs `PORTKEY_API_KEY`)
+1. Start the app (step 4). The landing page is Excel Print Optimizer; the sidebar shows whether
+   Microsoft Excel was found.
+2. Upload the workbook and choose the worksheet. The print area, used range and hidden columns are shown.
+3. **Columns to print**, e.g. `A, B, U, V, W, X, Y, Z` (letters, commas, ranges such as `U-Z`).
+   **Columns that decide whether a row is relevant**, e.g. `U, W` — they do not have to be printed.
+   The chips under each field show exactly what was understood; impossible columns are rejected
+   with a suggestion.
+4. Choose a mode:
+   - **Readability First** — set a minimum printed font (e.g. 8 pt). The app finds the fewest pages
+     that keep every text at least that size, then the largest text for that page count.
+   - **Page Count First** — set a page limit (e.g. 1). The app finds the largest text that fits.
+5. Choose paper (A3/A4), orientation, margins (Compact/Narrow/Normal) and repeated headers, then press
+   **Optimize for printing** (about 1–2 minutes: Excel exports and measures several real PDFs).
+6. Check the verdict, the **Verification checks**, **All row decisions** (why each row was printed or
+   left out) and the preview, then download the PDF.
 
-1. Switch **Check mode** to **AI · plain English**.
-2. Type or paste the rules as you received them, for example
-   *"maximum 5 pages, US Letter paper, at least 10 pt font and 1 inch margins"* or
-   *"A4 only, no more than 6 pages, 20 mm margins, double spaced"*.
-3. Load a PDF (upload or a sample button) and click **✨ Run AI analysis**.
-4. The app shows **What the AI understood** (including rules it cannot check, such as double
-   spacing), the measured results with an AI explanation for each, and an **Agent trace** tab with
-   the tools called, the API calls, tokens and Portkey cache status.
+**B. PDF Checker** (any computer)
 
-One AI analysis makes 2 API calls and uses about 4,500 tokens (measured average 4,460). Limits per
-analysis: 6 API calls, 8 tool calls, 30,000 tokens. Only the requirements text and the measurements
-are sent to the AI — never the PDF or its text. Each run is appended to `output/audit_trail.json`.
+1. Click **PDF Checker** in the sidebar.
+2. Click **⚠️ Problem sample** (or upload a PDF). In Manual mode the default rules are max 5 pages,
+   US Letter, minimum 10 pt and 1 inch margins.
+3. Read the result cards, the page preview with highlighted problems, and download the HTML report.
+4. Optional, with a Portkey key: switch to **AI · plain English**, type the rules as you received them
+   (e.g. *"A4 only, no more than 6 pages, 20 mm margins, double spaced"*) and run the AI analysis.
+
+## How it works — what is AI and what is not
+
+| Part | How it works |
+|---|---|
+| Excel Print Optimizer | **Deterministic Python + Microsoft Excel**, no language model. Reads the workbook through Excel on a temporary copy, filters rows by the filter columns (blank and zero count as empty; comments, errors and needed parent headings keep rows), keeps document metadata such as units from unprinted columns, renumbers printed items, measures candidate column widths, and searches the print scale by exporting **real PDFs** and measuring them with PyMuPDF. |
+| Excel verification | Every exported PDF is measured: paper size, page count/limit, smallest printed font, all printed values/headings/comments present, no clipped text (rendered-pixel check), no `###`, safe distance from the paper edges, table not split horizontally. A PDF that fails is offered only as **NOT verified**. |
+| Excel AI helper (optional) | "Describe what you want in your own words" can ask gpt-6-luna to fill in the form. It receives only your instruction and structural metadata (print area, column range, hidden column letters, row count) — never cell values. It was implemented but not exercised in our recorded AI runs. |
+| PDF Checker, Manual | Deterministic PyMuPDF measurements. |
+| PDF Checker, AI mode | A **PydanticAI agent** using **gpt-6-luna through Portkey** turns written requirements into tool calls (`check_page_limit`, `check_paper_size`, `check_min_font_size`, `check_margins`) and returns a structured `PrintProofReport`; an output validator rejects any report that disagrees with the measured tool results. The AI never sees the PDF or its text, only the numbers the tools return. |
+
+| File | Role |
+|---|---|
+| `app.py` | Entry point: Excel Print Optimizer first, PDF Checker second |
+| `pages/excel_print_optimizer.py`, `excel_print/` | Excel tool: interface, column parsing, row filter, metadata, numbering, layout search, Excel engine, PDF verification |
+| `pages/pdf_checker.py`, `pdf_checker.py`, `tools.py`, `agent.py`, `models.py`, `report.py` | PDF Checker: interface, measurements, AI tools, PydanticAI agent, structured output, HTML report |
+| `prompts/prompt.md`, `prompts/excel_layout_prompt.md` | AI instructions (PDF agent, optional Excel helper) |
 
 ## Run the tests
-
-Offline tests (free, no API calls, about 10 seconds):
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-Expected result: `69 passed, 4 skipped`. The 4 skipped tests make real Portkey calls and only run
-on request (about 4,000–5,000 tokens each):
+Expected on Windows with Microsoft Excel: **167 passed, 4 skipped** (about 12 minutes; the Excel tests drive a
+hidden Excel instance). Without Excel, the Excel integration and end-to-end regression tests are skipped.
+The 4 always-skipped tests make real Portkey calls and run only on request:
 
 ```powershell
 $env:RUN_LIVE_AI_TESTS = "1"; .\.venv\Scripts\python.exe -m pytest tests/test_agent.py -k live -s
 ```
 
-Re-run the evaluation on the 13 test PDFs (free):
+Re-run the PDF Checker evaluation on its 13 test PDFs (free): `.\.venv\Scripts\python.exe tests/evaluation.py`
 
-```powershell
-.\.venv\Scripts\python.exe tests/evaluation.py
-```
+## Evidence
+
+| File | Contents |
+|---|---|
+| `report.html`, `slides.html` | Final report (10–15 printed pages) and presentation |
+| `output/evaluation.md`, `output/evaluation_results.json` | PDF Checker: 13 test PDFs, 52 checks, expected results recorded before testing |
+| `output/safety_review.md`, `output/tokenomics.md` | PDF Checker safety tests; measured token use and cost estimates |
+| `output/audit_trail.json` | Append-only log of every AI run |
+| `tests/test_excel_*.py` | Excel tool: unit, layout-search, integration and regression tests (synthetic workbooks generated at test time) |
+| `AI_prompts.md` | The prompts used to build the project, by step |
+
+The Excel Print Optimizer was also tested in a larger automated QA campaign on a private workbook; its
+results are summarized in the report, but the workbook and its PDFs are confidential and not published.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| `python` or `py` opens the Microsoft Store / "Python was not found" | Install Python from python.org (includes the `py` launcher), then repeat step 2 |
-| `streamlit : The term 'streamlit' is not recognized` | Use the full command from step 4 (`.\.venv\Scripts\python.exe -m streamlit run app.py`) |
-| Sidebar says "Portkey key not found" | Check that `.env` is in the project folder or the folder directly above it, and that the line starts with `PORTKEY_API_KEY=` |
+| Excel Print Optimizer says Microsoft Excel was not found | The Excel tool needs Windows with Microsoft Excel installed; the PDF Checker still works |
+| The app shows old behaviour after an update | Stop it (Ctrl+C) and start it again; Streamlit keeps the code loaded at start |
+| `python` or `py` opens the Microsoft Store | Install Python from python.org, then repeat step 2 |
+| `streamlit` is not recognized | Use the full command from step 4 |
+| Sidebar says "Portkey key not found" | Put `.env` in the project folder or the folder above, with a line starting `PORTKEY_API_KEY=` |
 | Port 8501 is already in use | `.\.venv\Scripts\python.exe -m streamlit run app.py --server.port 8502` |
-| `git clone` or `pip install` fails with "Filename too long" | Clone into a short path such as `C:\Users\<you>\printproof-ai`; Windows limits paths to 260 characters |
+| "Filename too long" during clone or install | Clone into a short path such as `C:\Users\<you>\printproof-ai` |
 
-## How it works
+## Privacy
 
-| File | Role |
-|---|---|
-| `app.py` | Streamlit interface: manual mode, AI mode, results, page preview, report download |
-| `pdf_checker.py` | Measures the PDF with PyMuPDF: page count, page size, text sizes, distance of content to each edge; detects scanned pages |
-| `tools.py` | The checks the AI may call; return numbers only (PDF text is removed) |
-| `agent.py` | PydanticAI agent, Portkey/gpt-6-luna model, limits, output validator, audit trail |
-| `models.py` | Structured output (`PrintProofReport`) and run data |
-| `prompts/prompt.md` | Agent instructions |
-| `report.py` | Standalone HTML report with fix suggestions |
-
-**How the AI is kept honest:** the AI never sees the PDF; an output validator rejects any report
-whose statuses differ from the tool results; unclear or unsupported requirements are listed instead
-of guessed. gpt-6-luna is used with `reasoning_effort="none"` because Chat Completions only supports
-function calling with that setting
-([OpenAI model page](https://developers.openai.com/api/docs/models/gpt-6-luna)).
-
-## Evidence and evaluation
-
-Start with [`output/project_evidence.md`](output/project_evidence.md) — it separates measured
-results, estimates and pending items.
-
-| File | Contents |
-|---|---|
-| `output/evaluation.md`, `output/evaluation_results.json` | 13 test PDFs, 52 checks, expected results recorded before testing; manual vs AI mode |
-| `output/safety_review.md` | Protections and real attack tests |
-| `output/tokenomics.md` | Real token usage, Portkey cache hits, cost estimates |
-| `output/competitor_analysis.md` | Existing tools vs PrintProof, with sources |
-| `output/audit_trail.json` | Append-only log of every AI run |
-| `output/user_testing.md`, `output/user_test_results.csv` | Student test procedure and form — **results still pending** |
-| `output/final_checklist.md` | Final submission checks |
-| `output/screenshots/` | Real screenshots |
-| `tests/eval_expected.json`, `tests/eval_pdfs/` | Expected results and the 13 test PDFs |
-| `AI_prompts.md` | Every prompt used to build the project, by step |
-
-**Still pending:** testing with independent real-world PDFs and with real students. The evaluation
-PDFs were generated by us, so no accuracy claim is made for real documents.
+Workbooks are processed locally; the original file is never changed (Excel works on a temporary copy that
+is deleted afterwards). Excel files are excluded by `.gitignore`; only reviewed, synthetic demo workbooks
+are allowed in `demo/`. `.env` and API keys are never committed.
 
 ## Project structure
 
 ```
 printproof-ai/
-├── app.py, pdf_checker.py, agent.py, tools.py, models.py, report.py
-├── prompts/prompt.md
-├── sample_pdfs/            good_sample.pdf, bad_sample.pdf
-├── tests/                  test_*.py, evaluation.py, eval_expected.json, eval_pdfs/ (13 PDFs)
-├── output/                 evidence, audit trail, screenshots, checklists
-├── report.html             final report (standalone)
-├── slides.html             final presentation (standalone, reveal.js 5.2.1 bundled, MIT license)
-├── .streamlit/config.toml  starts Streamlit without the first-run prompt
-├── requirements.txt, .env.example, .gitignore
+├── app.py                         entry point (Excel first, PDF Checker second)
+├── pages/excel_print_optimizer.py, pages/pdf_checker.py
+├── excel_print/                   Excel tool logic
+├── pdf_checker.py, tools.py, agent.py, models.py, report.py
+├── prompts/                       AI instructions
+├── sample_pdfs/                   good_sample.pdf, bad_sample.pdf
+├── tests/                         test_*.py, evaluation.py, eval_pdfs/
+├── output/                        evidence, audit trail, screenshots
+├── report.html, slides.html       final report and presentation (standalone)
+├── .streamlit/config.toml, requirements.txt, .env.example, .gitignore
 ├── AI_prompts.md
 └── README.md
 ```
