@@ -121,8 +121,15 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
   <h2><span class="num">2</span>Motivation</h2>
   <h3>How the project changed direction</h3>
   <p>We started with a narrow problem: people submit or print PDFs that break page, paper, font or margin rules, and only find out when a print shop, portal or professor rejects them. Our first tool, the <b>PDF Checker</b>, measures a finished PDF and reports exactly which rule fails on which page, optionally with the rules written in plain English for an AI agent.</p>
-  <p>After building it, we showed it to a former colleague who works with large investment budgets and financial reports in the energy industry. The conversation turned in an unexpected direction: his most frustrating printing problem happened <i>before</i> any PDF existed. He regularly works with very large Excel workbooks — many rows, numerous financial columns, categories, subtotals, comments and a lot of information that is not relevant to the particular report he needs. Producing a useful printout meant identifying the important columns by hand, hiding or filtering the rest, changing column widths and text wrapping, choosing paper size and orientation, and printing again and again until the document became readable.</p>
-  <p>That conversation redirected our development. The PDF Checker verifies a finished document; the harder and more time-consuming task is <b>preparing the document correctly in the first place</b>. We therefore built <b>Excel Print Optimizer</b> and made it the main tool, keeping the PDF Checker as the second step of the same workflow. The colleague's feedback was qualitative motivation; he did not formally test the finished product, and we do not claim measured time savings.</p>
+  <p>After building it, we showed it to a former colleague who works in the energy industry. He maintains a large <b>master Excel workbook</b> with monthly, quarterly and annual budgets and forecasts. New financial information and revised assumptions arrive regularly, and management often asks him to <b>print the updated tables and bring them to in-person discussions</b> instead of reviewing them on screen. His most frustrating printing problem therefore happened <i>before</i> any PDF existed: every request needs a different view of the same workbook.</p>
+  <table>
+    <tr><th style="width:28%">Request</th><th>What he prepares by hand</th></tr>
+    <tr><td>Annual budget discussion</td><td>Hide the monthly and quarterly detail; keep the annual plan, forecast and variance</td></tr>
+    <tr><td>Quarterly report</td><td>Keep the quarter's figures; hide annual totals and other columns that do not matter for this meeting</td></tr>
+    <tr><td>Every request</td><td>Hide rows with zero amounts, keep the totals and comments, adjust widths and wrapping, choose paper and orientation, and print again until the pages are readable</td></tr>
+  </table>
+  <p>By his own informal estimate this preparation takes <b>about five minutes per printout, sometimes longer</b>, and the requests often come under tight deadlines. It is repetitive work that needs attention but little judgement once he knows which columns the meeting needs.</p>
+  <p>That conversation redirected our development. The PDF Checker verifies a finished document; the harder and more time-consuming task is <b>preparing the document correctly in the first place</b>. We therefore built <b>Excel Print Optimizer</b> and made it the main tool: he states the columns for this request and the columns that decide which rows matter, and the app filters the rows, keeps totals, units and comments, lays out the table, renders real PDFs and verifies them, while he turns his attention to other work. The PDF Checker remains the second step of the same workflow. This is a qualitative user insight: the five-minute figure is his informal estimate, not a measurement; he did not formally test the finished product, and we do not claim measured time savings.</p>
 
   <h3>Why large budget workbooks are hard to print</h3>
   <ul>
@@ -232,8 +239,21 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
 <!-- ============ 7. IMPACT ============ -->
 <section id="impact" class="newpage">
   <h2><span class="num">7</span>Impact</h2>
-  <p>The practical problem is common wherever large financial workbooks are reviewed on paper or as PDFs: budget meetings, investment committees, project reviews. Excel Print Optimizer replaces a manual, trial-and-error preparation with one form and a verified result, while keeping the numbers exactly as Excel calculated them. We have not measured time savings with real users; the evidence below is technical.</p>
+  <p>The practical problem is common wherever large financial workbooks are reviewed on paper or as PDFs: budget meetings, investment committees, project reviews. Excel Print Optimizer replaces a manual, trial-and-error preparation with one form and a verified result, while keeping the numbers exactly as Excel calculated them. For the workflow in Section 2 (a new printed view of a changing master budget for each meeting) the user's part shrinks to choosing columns and settings; the filtering, layout and checking that he estimates at about five minutes or more per printout run automatically. We have not measured time savings with real users; the evidence below is technical.</p>
 
+  <h3>How much we tested</h3>
+  <p><span class="label t-meas">Measured</span> Every Excel scenario below was rendered by Microsoft Excel into a real PDF and measured. The categories overlap in what they cover, so we report them separately instead of adding them into one total.</p>
+  <table>
+    <tr><th style="width:27%">Evidence</th><th class="num">Count</th><th>What it is</th></tr>
+    <tr><td>Round 1 QA scenarios (before fixes)</td><td class="num">48</td><td>24 main configurations, 11 targeted, 3 synthetic-workbook, 5 cross-checks and 5 supplemental (filter columns, formulas); one measured PDF each</td></tr>
+    <tr><td>Round 2 reruns (after fixes)</td><td class="num">44</td><td>The same scenarios rerun, not new ones (only 1 cross-check was still needed); 43 of 44 passed</td></tr>
+    <tr><td>Targeted rerun of the last failure</td><td class="num">1</td><td>Page Count First font fix confirmed: 11.76 pt → 13.32 pt</td></tr>
+    <tr><td>Automated test suite</td><td class="num">171</td><td>98 for the Excel tool (49 unit, 11 layout-search, 15 integration and 23 regression tests; the integration and regression tests drive Excel on synthetic workbooks) and 73 for the PDF Checker; 167 pass, and 4 live-AI tests run only on request</td></tr>
+    <tr><td>Checks in the running app</td><td class="num">—</td><td>The reported A4 portrait case, the demo workbook, and a fresh clone of the repository</td></tr>
+  </table>
+  <p>The process was iterative: <b>test on real PDFs → find the failure → fix the underlying cause → rerun the same scenarios</b>. The scenarios covered A3 and A4, portrait and landscape, three margin presets, both optimization modes, filtering rules (zeros, hidden and unprinted filter columns), formulas, merged titles, comments, numbering and financial values.</p>
+
+  <div style="break-inside:avoid">
   <h3>Excel Print Optimizer: automated QA in two rounds</h3>
   <p><span class="label t-meas">Measured</span> A resumable QA harness ran the real pipeline (Microsoft Excel) and measured every PDF independently of the app's own checks. Round 1 used a real, confidential budget workbook (not published) plus synthetic workbooks:</p>
   <table>
@@ -244,6 +264,7 @@ footer { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 12px;
     <tr><td>Cross-checks (could fewer pages reach the minimum font?)</td><td class="num">5</td></tr>
     <tr><td>Supplemental: unprinted/hidden filter column; formula-driven financial table</td><td class="num">5</td><td>4 of 5 passed; all 66 compared numeric cells correct</td></tr>
   </table>
+  </div>
   <p>The failures were real and visible in the PDFs, and they guided the fixes:</p>
   <table>
     <tr><th>Problem found (round 1)</th><th class="num">Runs</th><th>Fix</th></tr>

@@ -19,15 +19,17 @@ PrintProof AI helps people get documents ready to print. It has two tools in one
 
 ## Why it exists
 
-We first built the PDF Checker, which verifies a finished document. When we showed it to a former
-colleague who works with large investment budgets and financial reports, it became clear that his more
-frustrating problem came *before* the PDF existed: very large Excel workbooks with many rows, many
-financial columns, sections, subtotals and comments, where a useful printout meant hiding columns,
-filtering rows, changing widths and wrapping, choosing paper and orientation, and printing again and
-again until the result was readable. That conversation redirected the project: Excel Print Optimizer
-prepares the document correctly in the first place, and the PDF Checker still checks documents that
-already exist. (The colleague's feedback was qualitative motivation; he did not test the finished tool,
-and we report no measured time savings.)
+We first built the PDF Checker, which verifies a finished document. Then we showed it to a former
+colleague in the energy industry who maintains a large master Excel workbook of monthly, quarterly and
+annual budgets and forecasts. New figures and revised assumptions arrive regularly, and management often
+asks him to bring **printed** tables to in-person discussions. Each request needs a different view: for
+an annual budget he removes the monthly and quarterly detail; for a quarterly report he may drop annual
+figures and other irrelevant columns. Every time he also hides zero rows, keeps totals and comments,
+adjusts formatting and makes the table fit readable pages. By his informal estimate this takes about
+five minutes per printout, sometimes longer, often under deadline. That conversation redirected the
+project: Excel Print Optimizer does this preparation automatically, and the PDF Checker still checks
+documents that already exist. (This is a qualitative user insight: the five minutes are his estimate,
+not a measurement; he did not test the finished tool, and we report no measured time savings.)
 
 ## System requirements
 
@@ -170,8 +172,10 @@ Re-run the PDF Checker evaluation on its 13 test PDFs (free): `.\.venv\Scripts\p
 | `tests/test_excel_*.py` | Excel tool: unit, layout-search, integration and regression tests (synthetic workbooks generated at test time) |
 | `AI_prompts.md` | The prompts used to build the project, by step |
 
-The Excel Print Optimizer was also tested in a larger automated QA campaign on a private workbook; its
-results are summarized in the report, but the workbook and its PDFs are confidential and not published.
+The Excel Print Optimizer was also tested in an automated QA campaign on a private workbook plus synthetic
+ones: 48 scenarios rendered as real PDFs before the fixes (1 of 43 harness scenarios passed, plus 4 of 5
+supplemental), then the same scenarios rerun after the fixes (43 of 44 passed; the last case was fixed in a
+targeted rerun). The report summarizes the results; the private workbook and its PDFs are not published.
 
 ## Troubleshooting
 

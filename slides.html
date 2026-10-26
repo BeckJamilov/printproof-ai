@@ -138,10 +138,10 @@ svg { width: 100%; height: auto; display: block; }
   <h2>From checking PDFs to preparing them</h2>
   <div class="flow" style="grid-template-columns: repeat(3, 1fr); margin-top:24px">
     <div class="card"><div class="n">1</div><h3>PDF Checker</h3><p>Our first tool verified a <b>finished</b> PDF: pages, paper, font, margins — with an AI agent for rules in plain English.</p></div>
-    <div class="card"><div class="n">2</div><h3>A colleague's real problem</h3><p>A former colleague who works with large investment budgets: the harder part happens <b>before</b> the PDF exists — turning a huge workbook into a readable printout.</p></div>
+    <div class="card"><div class="n">2</div><h3>A colleague's real problem</h3><p>A master budget workbook, revised often; management wants <b>printed tables</b> for meetings — annual view one day, quarterly the next. Pick columns, hide zero rows, keep totals and comments, fit the page: <b>~5 min or more</b> each time.</p></div>
     <div class="card pinkline"><div class="n">3</div><h3>Excel Print Optimizer</h3><p>Prepare the document correctly in the first place — and keep the PDF Checker for documents that already exist.</p></div>
   </div>
-  <p style="font-size:21px; margin-top:26px" class="muted">Qualitative motivation from one conversation — not a user study. No time savings are claimed.</p>
+  <p style="font-size:21px; margin-top:26px" class="muted">Qualitative user insight; ~5 min is his informal estimate, not a measurement. He did not test the finished tool; no time savings are claimed.</p>
 </section>
 
 <!-- 4. The transformation -->
@@ -209,11 +209,11 @@ svg { width: 100%; height: auto; display: block; }
 <!-- 8. Testing evidence -->
 <section>
   <div class="kicker">Evidence</div>
-  <h2>We tested, found real failures, fixed them, retested</h2>
+  <h2>Test on real PDFs → fix the cause → retest</h2>
   <div class="grid3" style="margin-top:8px">
-    <div class="card"><h3>Round 1 · 48 tests</h3><p>43 configurations (2 modes × A3/A4 × orientation × 3 margins, targeted, synthetic, cross-checks) + 5 supplemental. <b>1 of 43 passed.</b></p></div>
+    <div class="card"><h3>Round 1 · 48 scenarios</h3><p>24 main (2 modes × A3/A4 × orientation × 3 margins) + 11 targeted + 3 synthetic + 5 cross-checks + 5 supplemental, each a real PDF. <b>1 of 43</b> + 4 of 5 supplemental passed.</p></div>
     <div class="card"><h3>What failed</h3><p>Unit lost (38) · title clipped (8) · near-empty pages (4) · too many pages (3) · numbering gaps (3) · open borders (2)</p></div>
-    <div class="card pinkline"><h3>Round 2 · rerun</h3><p><b>38 of 39</b> configurations and <b>5 of 5</b> supplemental passed; the last case fixed afterwards (11.76 → 13.32 pt).</p></div>
+    <div class="card pinkline"><h3>Round 2 · same scenarios</h3><p>44 reruns, not new tests: <b>38 of 39</b> + <b>5 of 5</b> supplemental passed; the last case fixed afterwards (11.76 → 13.32 pt).</p></div>
   </div>
   <table class="t" style="margin-top:20px; font-size:19px">
     <tr><th>Example (measured)</th><th>Before</th><th>After</th></tr>
@@ -221,7 +221,7 @@ svg { width: 100%; height: auto; display: block; }
     <tr><td>A4 landscape, Readability First 8 pt</td><td class="no">4 pages, grand total alone</td><td class="yes">3 pages (2 after final fix)</td></tr>
     <tr><td>Formula table: printed numbers vs Excel's own results</td><td colspan="2" class="yes">44 / 44 and 22 / 22 cells identical — negatives, %, zeros, subtotals</td></tr>
   </table>
-  <p style="font-size:17px; margin-top:8px" class="muted">Also: PDF Checker 52/52 checks on 13 designed PDFs, 0 false positives. One real workbook + synthetic ones — no statistical accuracy claim.</p>
+  <p style="font-size:17px; margin-top:8px" class="muted">Plus 171 automated tests (98 for the Excel tool, incl. 23 regression) · PDF Checker 52/52 checks on 13 designed PDFs, 0 false positives. One real workbook + synthetic ones — no statistical accuracy claim.</p>
 </section>
 
 <!-- 9. Safety -->
